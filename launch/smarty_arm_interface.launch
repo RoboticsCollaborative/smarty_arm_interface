@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<launch>
+
+  <!-- smarty_arm_interface.launch -->
+  <arg name="output" default="screen" doc="Display output to screen or log file."/>
+  <arg name="smarty_arm_type" default="master" doc="RDDA type could be either master or slave"/>
+
+  <!-- load the smarty_arm_interface node -->
+  <node pkg="smarty_arm_interface" type="smarty_arm_interface_node" name="smarty_arm_interface_$(arg smarty_arm_type)" output="$(arg output)" args="$(arg smarty_arm_type)"/>
+
+
+</launch>
