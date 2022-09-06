@@ -36,8 +36,8 @@ void SMARTY_ARM_Node::publish_eepacket() {
     packet_msg.angle.y = rdda->arm[0].ee[4].pos;
     packet_msg.angle.z = rdda->arm[0].ee[5].pos;
     packet_msg.twist.linear.x = rdda->arm[0].ee[0].vel;
-    packet_msg.twist.linear.y = rdda->arm[0].ee[0].vel;
-    packet_msg.twist.linear.z = rdda->arm[0].ee[0].vel;
+    packet_msg.twist.linear.y = rdda->arm[0].ee[1].vel;
+    packet_msg.twist.linear.z = rdda->arm[0].ee[2].vel;
     packet_msg.twist.angular.x = 0.0;
     packet_msg.twist.angular.y = 0.0;
     packet_msg.twist.angular.z = 0.0;
