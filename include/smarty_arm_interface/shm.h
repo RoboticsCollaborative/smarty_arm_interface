@@ -24,6 +24,7 @@ typedef struct {
     double act_tau;
     double load_pos;
     double load_vel;
+    double last_load_pos;
 } MotorIn;
 
 /** AEV drive CSP Mode outputs from master */
