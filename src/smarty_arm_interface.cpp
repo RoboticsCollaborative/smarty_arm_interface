@@ -8,8 +8,8 @@ SMARTY_ARM_Node::SMARTY_ARM_Node(ros::NodeHandle &node, Rdda *rddaptr, std::stri
     rdda = rddaptr;
 
     if (node_type == "master") {
-        smarty_arm_packet_sub = nh_.subscribe("/pti_slave_output", 1, &SMARTY_ARM_Node::eepacket_callback, this, ros::TransportHints().udp());
-        smarty_arm_packet_pub = nh_.advertise<smarty_arm_interface::EEPacket>("/smarty_arm_output", 1);
+        smarty_arm_packet_sub = nh_.subscribe("/pti_slave_output", 1, &SMARTY_ARM_Node::ptipacket_callback, this, ros::TransportHints().udp());
+        smarty_arm_packet_pub = nh_.advertise<smarty_arm_interface::PTIPacket>("/smarty_arm_output", 1);
     }
 
     ROS_INFO("Node initialized");
@@ -19,15 +19,17 @@ SMARTY_ARM_Node::~SMARTY_ARM_Node() = default;
 
 
 /* Publish rdda packet through ROS */
-void SMARTY_ARM_Node::publish_eepacket() {
+void SMARTY_ARM_Node::publish_ptipacket() {
 
-    smarty_arm_interface::EEPacket packet_msg;
+    smarty_arm_interface::PTIPacket packet_msg;
 
     packet_msg.wave.resize(3);
+    packet_msg.test.resize(3);
 
     mutex_lock(&rdda->mutex);
     for (int i = 0; i < 3; i ++) {
-        packet_msg.wave[i] = rdda->arm[0].eePacket[i].wave_out;
+        packet_msg.wave[i] = rdda->arm[0].ptiPacket[i].wave_out;
+        packet_msg.test[i] = rdda->motor[i].motorIn.act_tau;
     }
     packet_msg.position.x = rdda->arm[0].ee[0].pos;
     packet_msg.position.y = rdda->arm[0].ee[1].pos;
@@ -38,16 +40,16 @@ void SMARTY_ARM_Node::publish_eepacket() {
     packet_msg.twist.linear.x = rdda->arm[0].ee[0].vel;
     packet_msg.twist.linear.y = rdda->arm[0].ee[1].vel;
     packet_msg.twist.linear.z = rdda->arm[0].ee[2].vel;
-    packet_msg.twist.angular.x = 0.0;
-    packet_msg.twist.angular.y = 0.0;
-    packet_msg.twist.angular.z = 0.0;
+    packet_msg.twist.angular.x = rdda->arm[0].ee[3].vel;
+    packet_msg.twist.angular.y = rdda->arm[0].ee[4].vel;
+    packet_msg.twist.angular.z = rdda->arm[0].ee[5].vel;
     mutex_unlock(&rdda->mutex);
 
     // if (smarty_arm_packet_pub.getNumSubscribers() == 0) {
     //     if (node_type == "master") {
     //         ROS_ERROR_STREAM("Connection lost, trying to reconnect...");
     //         smarty_arm_packet_pub.shutdown();
-    //         smarty_arm_packet_pub = nh_.advertise<smarty_arm_interface::EEPacket>("/smarty_arm_output", 1);
+    //         smarty_arm_packet_pub = nh_.advertise<smarty_arm_interface::PTIPacket>("/smarty_arm_output", 1);
     //     }
     // }
 
@@ -58,11 +60,11 @@ void SMARTY_ARM_Node::publish_eepacket() {
 
 /* Subscriber callback */
 /* Comment out callback for remote test */
-void SMARTY_ARM_Node::eepacket_callback(const smarty_arm_interface::EEPacket::ConstPtr &packet_msg) {
+void SMARTY_ARM_Node::ptipacket_callback(const smarty_arm_interface::PTIPacket::ConstPtr &packet_msg) {
 
     mutex_lock(&rdda->mutex);
     for (int i = 0; i < 3; i++) {
-        rdda->arm[0].eePacket[i].wave_in = packet_msg->wave[i];
+        rdda->arm[0].ptiPacket[i].wave_in = packet_msg->wave[i];
     }
 
     mutex_unlock(&rdda->mutex);
@@ -76,7 +78,7 @@ void SMARTY_ARM_Node::run() {
     ros::Rate loop_rate(500);
     while (ros::ok()) {
 	/* Publisher (wrap) */
-    publish_eepacket();
+    publish_ptipacket();
 	/* Subscriber callback loop */
 	ros::spinOnce();
 	loop_rate.sleep();

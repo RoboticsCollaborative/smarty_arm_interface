@@ -24,7 +24,6 @@ typedef struct {
     double act_tau;
     double load_pos;
     double load_vel;
-    double last_load_pos;
 } MotorIn;
 
 /** AEV drive CSP Mode outputs from master */
@@ -53,12 +52,12 @@ typedef struct {
     double wave_in_aux;
     double wave_out_aux;
     double test;
-} EEPacket;
+} PTIPacket;
 
 /* Arm class */
 typedef struct {
     EE_state ee[DOF];
-    EEPacket eePacket[DOF];
+    PTIPacket ptiPacket[DOF];
 } Arm;
 
 /** AEV slave class */

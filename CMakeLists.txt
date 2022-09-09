@@ -23,7 +23,7 @@ add_message_files(
     DIRECTORY
     msg
     FILES
-    EEPacket.msg
+    PTIPacket.msg
 )
 
 ## Generate added messages and services with any dependencies listed here

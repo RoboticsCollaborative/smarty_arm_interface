@@ -12,7 +12,7 @@
 #include <ros/ros.h>
 #include <std_msgs/Float64.h>
 #include <std_srvs/Empty.h>
-#include "smarty_arm_interface/EEPacket.h"
+#include "smarty_arm_interface/PTIPacket.h"
 
 /* C headers */
 extern "C" {
@@ -38,8 +38,8 @@ class SMARTY_ARM_Node {
 
     std::string node_type;
 
-    void publish_eepacket();
-    void eepacket_callback(const smarty_arm_interface::EEPacket::ConstPtr &msg);
+    void publish_ptipacket();
+    void ptipacket_callback(const smarty_arm_interface::PTIPacket::ConstPtr &msg);
 
     bool initSlave(std_srvs::Empty::Request &req, std_srvs::Empty::Response &res);
 };
