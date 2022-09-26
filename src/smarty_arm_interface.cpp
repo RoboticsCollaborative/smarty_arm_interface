@@ -75,7 +75,7 @@ void SMARTY_ARM_Node::ptipacket_callback(const smarty_arm_interface::PTIPacket::
 
 /* Run loop */
 void SMARTY_ARM_Node::run() {
-    ros::Rate loop_rate(500);
+    ros::Rate loop_rate(2000);
     while (ros::ok()) {
 	/* Publisher (wrap) */
     publish_ptipacket();
