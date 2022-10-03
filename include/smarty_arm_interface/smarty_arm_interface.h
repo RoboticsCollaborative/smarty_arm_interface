@@ -21,7 +21,7 @@ extern "C" {
 
 class SMARTY_ARM_Node {
  public:
-    explicit SMARTY_ARM_Node(ros::NodeHandle& node, Rdda *rdda, std::string type);
+    explicit SMARTY_ARM_Node(ros::NodeHandle& node, Arm *arm, std::string type);
 
     ~SMARTY_ARM_Node();
 
@@ -34,7 +34,7 @@ class SMARTY_ARM_Node {
 
     ros::Publisher smarty_arm_packet_pub; 
 
-    Rdda *rdda;
+    Arm *arm;
 
     std::string node_type;
 

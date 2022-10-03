@@ -1,6 +1,7 @@
 #include "../include/smarty_arm_interface/shm.h"
 
-char* SMARTY_ARM_DATA     =   (char *)"/smarty_arm_data";
+char* SMARTY_ARM_RIGHT_DATA = (char *)"/smarty_arm_right_data";
+char* SMARTY_ARM_LEFT_DATA = (char *)"/smarty_arm_left_data";
 
 /** Acuqire robust mutex
   *
@@ -95,20 +96,30 @@ openSharedMemory(char *shm_name, void **p) {
  *
  * @return jointCommands pointer.
  */
-Rdda *initRdda() {
+Arm *initArm(char LOR) {
 
-    Rdda *rdda;
+    Arm *arm;
     void *p;
-
-    if (!openSharedMemory(SMARTY_ARM_DATA, &p)) {
-        rdda = (Rdda *) p;
-    } else {
-        fprintf(stderr, "Open shared memory\n");
-        return NULL;
+    
+    if (LOR == 'r') {
+        if (!openSharedMemory(SMARTY_ARM_RIGHT_DATA, &p)) {
+            arm = (Arm *) p;
+        } else {
+            fprintf(stderr, "open(SMARTY_ARM_RIGHT_DATA)\n");
+            return NULL;
+        }
+    }
+    else if (LOR == 'l') {
+        if (!openSharedMemory(SMARTY_ARM_LEFT_DATA, &p)) {
+            arm = (Arm *) p;
+        } else {
+            fprintf(stderr, "open(SMARTY_ARM_LEFT_DATA)\n");
+            return NULL;
+        }
     }
 
     /* initialise mutex lock */
-    //mutex_init(&rdda->mutex);
+    mutex_init(&arm->mutex);
 
-    return rdda;
+    return arm;
 }

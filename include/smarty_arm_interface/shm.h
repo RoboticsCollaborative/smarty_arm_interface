@@ -1,5 +1,5 @@
-#ifndef RDDA_SHM_H
-#define RDDA_SHM_H
+#ifndef ARM_SHM_H
+#define ARM_SHM_H
 
 #include <stdio.h>
 #include <unistd.h>
@@ -14,7 +14,6 @@
 
 #define SHM_SIZE    4096*2
 #define AEV_NUM 3
-#define ARM_NUM 1
 #define DOF 6
 
 /** AEV drive CSP Mode inputs to master */
@@ -40,7 +39,7 @@ typedef struct {
     double force;
 } EE_state;
 
-/** RDDAPacket transmitted using ROS */
+/** ARMPacket transmitted using ROS */
 typedef struct {
     double pos_in;
     double pos_out;
@@ -53,12 +52,6 @@ typedef struct {
     double wave_out_aux;
     double test;
 } PTIPacket;
-
-/* Arm class */
-typedef struct {
-    EE_state ee[DOF];
-    PTIPacket ptiPacket[DOF];
-} Arm;
 
 /** AEV slave class */
 typedef struct {
@@ -81,15 +74,15 @@ typedef struct {
 /** EtherCAT slave class */
 typedef struct {
     AEV_slave motor[AEV_NUM];
-    Arm arm[2];
+    EE_state ee[DOF];
+    PTIPacket ptiPacket[DOF];
     double freq_anti_alias;
     Timestamp ts;
     pthread_mutex_t mutex;
-} Rdda;
+} Arm;
 
-
-Rdda *initRdda();
+Arm *initArm(char LOR);
 int mutex_lock(pthread_mutex_t *mutex);
 int mutex_unlock(pthread_mutex_t *mutex);
 
-#endif //RDDA_SHM_H
+#endif //ARM_SHM_H
