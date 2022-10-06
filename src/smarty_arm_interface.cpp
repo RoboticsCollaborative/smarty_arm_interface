@@ -47,15 +47,23 @@ void SMARTY_ARM_Node::publish_ptipacket() {
     packet_msg.twist.angular.x = arm->ee[3].vel;
     packet_msg.twist.angular.y = arm->ee[4].vel;
     packet_msg.twist.angular.z = arm->ee[5].vel;
+    packet_msg.timestamp = arm->ts.remote_time;
     mutex_unlock(&arm->mutex);
 
-    // if (smarty_arm_packet_pub.getNumSubscribers() == 0) {
-    //     if (node_type == "master") {
-    //         ROS_ERROR_STREAM("Connection lost, trying to reconnect...");
-    //         smarty_arm_packet_pub.shutdown();
-    //         smarty_arm_packet_pub = nh_.advertise<smarty_arm_interface::PTIPacket>("/smarty_arm_output", 1);
-    //     }
-    // }
+    if (smarty_arm_packet_pub.getNumSubscribers() == 0) {
+        if (node_type == "r") {
+            ROS_ERROR_STREAM("Connection lost, trying to reconnect...");
+            smarty_arm_packet_pub.shutdown();
+            smarty_arm_packet_pub = nh_.advertise<smarty_arm_interface::PTIPacket>("/right_smarty_arm_output", 1);
+            // smarty_arm_packet_sub = nh_.subscribe("/pti_right_output", 1, &SMARTY_ARM_Node::ptipacket_callback, this, ros::TransportHints().udp());
+        }
+        if (node_type == "l") {
+            ROS_ERROR_STREAM("Connection lost, trying to reconnect...");
+            smarty_arm_packet_pub.shutdown();
+            smarty_arm_packet_pub = nh_.advertise<smarty_arm_interface::PTIPacket>("/left_smarty_arm_output", 1);
+            // smarty_arm_packet_sub = nh_.subscribe("/pti_left_output", 1, &SMARTY_ARM_Node::ptipacket_callback, this, ros::TransportHints().udp());
+        }
+    }
 
     smarty_arm_packet_pub.publish(packet_msg);
 
@@ -70,6 +78,7 @@ void SMARTY_ARM_Node::ptipacket_callback(const smarty_arm_interface::PTIPacket::
     for (int i = 0; i < 3; i++) {
         arm->ptiPacket[i].wave_in = packet_msg->wave[i];
     }
+    arm->ts.remote_time = packet_msg->timestamp;
 
     mutex_unlock(&arm->mutex);
     ROS_INFO_THROTTLE(1, "Write into smarty arm memory");
@@ -80,6 +89,7 @@ void SMARTY_ARM_Node::ptipacket_callback(const smarty_arm_interface::PTIPacket::
 /* Run loop */
 void SMARTY_ARM_Node::run() {
     ros::Rate loop_rate(2000);
+    arm->ts.remote_time = ros::Time::now().toSec();
     while (ros::ok()) {
 	/* Publisher (wrap) */
     publish_ptipacket();

@@ -69,6 +69,7 @@ typedef struct {
 typedef struct {
     int64_t sec;
     int64_t nsec;
+    double remote_time;
 } Timestamp;
 
 /** EtherCAT slave class */
