@@ -50,6 +50,7 @@ typedef struct {
     double wave_out;
     double wave_in_aux;
     double wave_out_aux;
+    double position_origin_shift;
     double test;
 } PTIPacket;
 

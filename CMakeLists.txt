@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
     std_msgs
     geometry_msgs
     message_generation
+    dynamic_reconfigure
 )
 
 ## System dependencies are found with CMake's conventions
@@ -31,6 +32,11 @@ generate_messages(
   DEPENDENCIES
   std_msgs
   geometry_msgs
+)
+
+## Generate dynamic reconfigure parameters in the 'cfg' folder
+generate_dynamic_reconfigure_options(
+  cfg/position_shift.cfg
 )
 
 ###################################
@@ -74,4 +80,10 @@ target_link_libraries(${PROJECT_NAME}_node
     ${PROJECT_NAME}_src
     -lrt
 )
-add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
+
+# add_executable(${PROJECT_NAME}_panel src/server.cpp)
+# target_link_libraries(${PROJECT_NAME}_panel 
+#     ${catkin_LIBRARIES}
+# )
+# add_dependencies(${PROJECT_NAME}_panel ${PROJECT_NAME}_gencfg)

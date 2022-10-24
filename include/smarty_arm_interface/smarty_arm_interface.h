@@ -13,6 +13,8 @@
 #include <std_msgs/Float64.h>
 #include <std_srvs/Empty.h>
 #include "smarty_arm_interface/PTIPacket.h"
+#include <dynamic_reconfigure/server.h>
+#include <smarty_arm_interface/SmartyArmConfig.h>
 
 /* C headers */
 extern "C" {

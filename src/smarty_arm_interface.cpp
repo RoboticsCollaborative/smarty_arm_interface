@@ -1,5 +1,7 @@
 #include "smarty_arm_interface/smarty_arm_interface.h"
 
+double origin_position[DOF/2];
+
 using namespace std;
 
 /* RDDNode constructor */
@@ -75,7 +77,7 @@ void SMARTY_ARM_Node::publish_ptipacket() {
 void SMARTY_ARM_Node::ptipacket_callback(const smarty_arm_interface::PTIPacket::ConstPtr &packet_msg) {
 
     mutex_lock(&arm->mutex);
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < DOF/2; i++) {
         arm->ptiPacket[i].wave_in = packet_msg->wave[i];
     }
     arm->ts.remote_time = packet_msg->timestamp;
@@ -85,6 +87,14 @@ void SMARTY_ARM_Node::ptipacket_callback(const smarty_arm_interface::PTIPacket::
 
 }
 
+void origin_shift_callback(smarty_arm_interface::SmartyArmConfig &config, uint32_t level) {
+
+    origin_position[0] = config.x0_shift;
+    origin_position[1] = config.y0_shift;
+    origin_position[2] = config.z0_shift;
+
+    ROS_INFO("Reconfigure Request: %f %f %f", config.x0_shift, config.y0_shift, config.z0_shift);
+}
 
 /* Run loop */
 void SMARTY_ARM_Node::run() {
@@ -93,6 +103,9 @@ void SMARTY_ARM_Node::run() {
     while (ros::ok()) {
 	/* Publisher (wrap) */
     publish_ptipacket();
+    for(int i = 0; i < DOF/2; i ++) {
+        arm->ptiPacket[i].position_origin_shift = origin_position[i];
+    }
 	/* Subscriber callback loop */
 	ros::spinOnce();
 	loop_rate.sleep();
@@ -121,6 +134,15 @@ int main(int argc, char** argv) {
 
     // initialize a node with "master" or "slave" setting
     SMARTY_ARM_Node smarty_arm(node, arm, std::string(argv[1]));
+
+    for(int i = 0; i < DOF/2; i ++) {
+        origin_position[i] = 0.0;
+    }
+    dynamic_reconfigure::Server<smarty_arm_interface::SmartyArmConfig> server;
+    dynamic_reconfigure::Server<smarty_arm_interface::SmartyArmConfig>::CallbackType f;
+    f = boost::bind(&origin_shift_callback, _1, _2);
+    server.setCallback(f);
+
     ROS_INFO("Node starts running");
     smarty_arm.run();
 }
