@@ -54,6 +54,13 @@ typedef struct {
     double test;
 } PTIPacket;
 
+typedef struct {
+    double w;
+    double x;
+    double y;
+    double z;
+} Quaternion;
+
 /** AEV slave class */
 typedef struct {
     MotorIn motorIn;
@@ -78,6 +85,7 @@ typedef struct {
     AEV_slave motor[AEV_NUM];
     EE_state ee[DOF];
     PTIPacket ptiPacket[DOF];
+    Quaternion quat;
     double freq_anti_alias;
     Timestamp ts;
     pthread_mutex_t mutex;

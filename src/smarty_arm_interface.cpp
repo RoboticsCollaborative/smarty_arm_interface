@@ -43,6 +43,10 @@ void SMARTY_ARM_Node::publish_ptipacket() {
     packet_msg.angle.x = arm->ee[3].pos;
     packet_msg.angle.y = arm->ee[4].pos;
     packet_msg.angle.z = arm->ee[5].pos;
+    packet_msg.quat.w = arm->quat.w;
+    packet_msg.quat.x = arm->quat.x;
+    packet_msg.quat.y = arm->quat.y;
+    packet_msg.quat.z = arm->quat.z;
     packet_msg.twist.linear.x = arm->ee[0].vel;
     packet_msg.twist.linear.y = arm->ee[1].vel;
     packet_msg.twist.linear.z = arm->ee[2].vel;
