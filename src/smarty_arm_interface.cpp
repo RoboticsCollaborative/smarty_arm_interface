@@ -102,7 +102,7 @@ void origin_shift_callback(smarty_arm_interface::SmartyArmConfig &config, uint32
 
 /* Run loop */
 void SMARTY_ARM_Node::run() {
-    ros::Rate loop_rate(200);
+    ros::Rate loop_rate(1000);
     arm->ts.remote_time = ros::Time::now().toSec();
     while (ros::ok()) {
 	/* Publisher (wrap) */
