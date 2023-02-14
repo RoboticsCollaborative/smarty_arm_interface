@@ -10,11 +10,11 @@ SMARTY_ARM_Node::SMARTY_ARM_Node(ros::NodeHandle &node, Arm *armptr, std::string
     arm = armptr;
 
     if (node_type == "r") {
-        smarty_arm_packet_sub = nh_.subscribe("/pti_right_output", 1, &SMARTY_ARM_Node::ptipacket_callback, this, ros::TransportHints().udp());
+        smarty_arm_packet_sub = nh_.subscribe("/pti_interface_right/pti_output", 1, &SMARTY_ARM_Node::ptipacket_callback, this, ros::TransportHints().udp());
         smarty_arm_packet_pub = nh_.advertise<smarty_arm_interface::PTIPacket>("/right_smarty_arm_output", 1);
     }
     else if (node_type == "l") {
-        smarty_arm_packet_sub = nh_.subscribe("/pti_left_output", 1, &SMARTY_ARM_Node::ptipacket_callback, this, ros::TransportHints().udp());
+        smarty_arm_packet_sub = nh_.subscribe("/pti_interface_left/pti_output", 1, &SMARTY_ARM_Node::ptipacket_callback, this, ros::TransportHints().udp());
         smarty_arm_packet_pub = nh_.advertise<smarty_arm_interface::PTIPacket>("/left_smarty_arm_output", 1);
     }
 
