@@ -35,7 +35,7 @@ void SMARTY_ARM_Node::publish_ptipacket() {
     mutex_lock(&arm->mutex);
     for (int i = 0; i < 3; i ++) {
         packet_msg.wave[i] = arm->ptiPacket[i].wave_out;
-        packet_msg.test[i] = arm->motor[i].motorIn.act_tau;
+        packet_msg.test[i] = arm->ptiPacket[i].test;
     }
     packet_msg.position.x = arm->ee[0].pos;
     packet_msg.position.y = arm->ee[1].pos;
@@ -53,7 +53,8 @@ void SMARTY_ARM_Node::publish_ptipacket() {
     packet_msg.twist.angular.x = arm->ee[3].vel;
     packet_msg.twist.angular.y = arm->ee[4].vel;
     packet_msg.twist.angular.z = arm->ee[5].vel;
-    packet_msg.timestamp = arm->ts.remote_time;
+    packet_msg.local_stamp = ros::Time::now().toSec();
+    packet_msg.remote_stamp = arm->ts.remote_time;
     mutex_unlock(&arm->mutex);
 
     // if (smarty_arm_packet_pub.getNumSubscribers() == 0) {
@@ -79,15 +80,31 @@ void SMARTY_ARM_Node::publish_ptipacket() {
 /* Subscriber callback */
 /* Comment out callback for remote test */
 void SMARTY_ARM_Node::ptipacket_callback(const smarty_arm_interface::PTIPacket::ConstPtr &packet_msg) {
+    double delay_time;
 
     mutex_lock(&arm->mutex);
     for (int i = 0; i < DOF/2; i++) {
         arm->ptiPacket[i].wave_in = packet_msg->wave[i];
     }
-    arm->ts.remote_time = packet_msg->timestamp;
+
+    arm->ptiPacket[0].pos_in = packet_msg->position.x;
+    arm->ptiPacket[1].pos_in = packet_msg->position.y;
+    arm->ptiPacket[2].pos_in = packet_msg->position.z;
+
+    arm->ptiPacket[0].vel_in = packet_msg->twist.linear.x;
+    arm->ptiPacket[1].vel_in = packet_msg->twist.linear.y;
+    arm->ptiPacket[2].vel_in = packet_msg->twist.linear.z;
+
+    arm->ptiPacket[0].pos_d_in = packet_msg->position_d.x;
+    arm->ptiPacket[1].pos_d_in = packet_msg->position_d.y;
+    arm->ptiPacket[2].pos_d_in = packet_msg->position_d.z;
+
+    arm->ts.remote_time = packet_msg->local_stamp;
+    delay_time = (ros::Time::now().toSec() - packet_msg->remote_stamp) / 2.0;
+    arm->ts.delay_cycle = (int)(delay_time / 1e-3);
 
     mutex_unlock(&arm->mutex);
-    ROS_INFO_THROTTLE(1, "Write into smarty arm memory");
+    ROS_INFO_THROTTLE(1, "Write into smarty arm memory, message delay: %lf", delay_time);
 
 }
 

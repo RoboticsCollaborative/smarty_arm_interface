@@ -43,6 +43,7 @@ typedef struct {
 typedef struct {
     double pos_in;
     double pos_out;
+    double pos_d_in;
     double vel_in;
     double vel_out;
     double force;
@@ -78,6 +79,7 @@ typedef struct {
     int64_t sec;
     int64_t nsec;
     double remote_time;
+    int delay_cycle;
 } Timestamp;
 
 /** EtherCAT slave class */
