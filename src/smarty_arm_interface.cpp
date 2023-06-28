@@ -1,4 +1,6 @@
 #include "smarty_arm_interface/smarty_arm_interface.h"
+#include "ros/callback_queue.h"
+#include <ros/topic_manager.h>
 
 double origin_position[DOF/2];
 
@@ -10,11 +12,11 @@ SMARTY_ARM_Node::SMARTY_ARM_Node(ros::NodeHandle &node, Arm *armptr, std::string
     arm = armptr;
 
     if (node_type == "r") {
-        smarty_arm_packet_sub = nh_.subscribe("/pti_interface_right/pti_output", 1, &SMARTY_ARM_Node::ptipacket_callback, this, ros::TransportHints().udp());
+        smarty_arm_packet_sub = nh_.subscribe("/pti_interface_right/pti_output", 1, &SMARTY_ARM_Node::ptipacket_callback, this);
         smarty_arm_packet_pub = nh_.advertise<smarty_arm_interface::PTIPacket>("/right_smarty_arm_output", 1);
     }
     else if (node_type == "l") {
-        smarty_arm_packet_sub = nh_.subscribe("/pti_interface_left/pti_output", 1, &SMARTY_ARM_Node::ptipacket_callback, this, ros::TransportHints().udp());
+        smarty_arm_packet_sub = nh_.subscribe("/pti_interface_left/pti_output", 1, &SMARTY_ARM_Node::ptipacket_callback, this);
         smarty_arm_packet_pub = nh_.advertise<smarty_arm_interface::PTIPacket>("/left_smarty_arm_output", 1);
     }
 
@@ -81,8 +83,8 @@ void SMARTY_ARM_Node::publish_ptipacket() {
 /* Comment out callback for remote test */
 void SMARTY_ARM_Node::ptipacket_callback(const smarty_arm_interface::PTIPacket::ConstPtr &packet_msg) {
     double delay_time;
-
     mutex_lock(&arm->mutex);
+    // std::cout << "Test" << std::endl;
     for (int i = 0; i < DOF/2; i++) {
         arm->ptiPacket[i].wave_in = packet_msg->wave[i];
     }
