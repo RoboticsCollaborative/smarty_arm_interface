@@ -13,6 +13,7 @@
 #include <std_msgs/Float64.h>
 #include <std_srvs/Empty.h>
 #include <std_msgs/Bool.h>
+#include <geometry_msgs/Pose.h>
 #include "smarty_arm_interface/PTIPacket.h"
 #include <dynamic_reconfigure/server.h>
 #include <smarty_arm_interface/SmartyArmConfig.h>
@@ -35,13 +36,16 @@ class SMARTY_ARM_Node {
 
     ros::Subscriber smarty_arm_packet_sub;
 
-    ros::Publisher smarty_arm_packet_pub; 
+    ros::Publisher smarty_arm_packet_pub;
+
+    ros::Publisher smarty_arm_pose_pub; 
 
     Arm *arm;
 
     std::string node_type;
 
     void publish_ptipacket();
+    void publish_pose_state();
     void ptipacket_callback(const smarty_arm_interface::PTIPacket::ConstPtr &msg);
 
     bool initSlave(std_srvs::Empty::Request &req, std_srvs::Empty::Response &res);

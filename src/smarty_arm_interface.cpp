@@ -14,10 +14,12 @@ SMARTY_ARM_Node::SMARTY_ARM_Node(ros::NodeHandle &node, Arm *armptr, std::string
     if (node_type == "r") {
         smarty_arm_packet_sub = nh_.subscribe("/pti_interface_right/pti_output", 1, &SMARTY_ARM_Node::ptipacket_callback, this);
         smarty_arm_packet_pub = nh_.advertise<smarty_arm_interface::PTIPacket>("/right_smarty_arm_output", 1);
+        smarty_arm_pose_pub = nh_.advertise<geometry_msgs::Pose>("/right_arm_pose", 1);
     }
     else if (node_type == "l") {
         smarty_arm_packet_sub = nh_.subscribe("/pti_interface_left/pti_output", 1, &SMARTY_ARM_Node::ptipacket_callback, this);
         smarty_arm_packet_pub = nh_.advertise<smarty_arm_interface::PTIPacket>("/left_smarty_arm_output", 1);
+        smarty_arm_pose_pub = nh_.advertise<geometry_msgs::Pose>("/left_arm_pose", 1);
     }
 
     ROS_INFO("Node initialized");
@@ -110,6 +112,19 @@ void SMARTY_ARM_Node::ptipacket_callback(const smarty_arm_interface::PTIPacket::
 
 }
 
+void SMARTY_ARM_Node::publish_pose_state() {
+    geometry_msgs::Pose pose;
+    pose.position.x = arm->ee[0].pos;
+    pose.position.y = arm->ee[1].pos;
+    pose.position.z = arm->ee[2].pos;
+    pose.orientation.w = arm->quat.w;
+    pose.orientation.x = arm->quat.x;
+    pose.orientation.y = arm->quat.y;
+    pose.orientation.z = arm->quat.z;
+
+    smarty_arm_pose_pub.publish(pose);
+}
+
 void origin_shift_callback(smarty_arm_interface::SmartyArmConfig &config, uint32_t level) {
 
     origin_position[0] = config.x0_shift;
@@ -121,17 +136,24 @@ void origin_shift_callback(smarty_arm_interface::SmartyArmConfig &config, uint32
 
 /* Run loop */
 void SMARTY_ARM_Node::run() {
-    ros::Rate loop_rate(1000);
+    int teleop_freq = 1000;
+    int low_freq_state_pub = 10;
+    int low_freq_state_pub_index = 0;
+    ros::Rate loop_rate(teleop_freq);
     arm->ts.remote_time = ros::Time::now().toSec();
     while (ros::ok()) {
 	/* Publisher (wrap) */
-    publish_ptipacket();
-    for(int i = 0; i < DOF/2; i ++) {
-        arm->ptiPacket[i].position_origin_shift = origin_position[i];
-    }
-	/* Subscriber callback loop */
-	ros::spinOnce();
-	loop_rate.sleep();
+        publish_ptipacket();
+        if (low_freq_state_pub_index >= int(teleop_freq/low_freq_state_pub)) low_freq_state_pub_index = 0;
+        if (low_freq_state_pub_index == 0) {publish_pose_state();}
+        low_freq_state_pub_index++;
+
+        for(int i = 0; i < DOF/2; i ++) {
+            arm->ptiPacket[i].position_origin_shift = origin_position[i];
+        }
+	    /* Subscriber callback loop */
+	    ros::spinOnce();
+	    loop_rate.sleep();
     }
 }
 
