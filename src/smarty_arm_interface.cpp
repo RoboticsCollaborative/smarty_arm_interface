@@ -10,13 +10,14 @@ using namespace std;
 SMARTY_ARM_Node::SMARTY_ARM_Node(ros::NodeHandle &node, Arm *armptr, std::string type): node_type(type) {
     nh_ = node;
     arm = armptr;
-
-    if (node_type == "r") {
+    
+    // Hacky solution to mirror the arm control signal for Diffusion Policy setup
+    if (node_type == "l") {
         smarty_arm_packet_sub = nh_.subscribe("/pti_interface_right/pti_output", 1, &SMARTY_ARM_Node::ptipacket_callback, this);
         smarty_arm_packet_pub = nh_.advertise<smarty_arm_interface::PTIPacket>("/right_smarty_arm_output", 1);
         smarty_arm_pose_pub = nh_.advertise<geometry_msgs::Pose>("/right_arm_pose", 1);
     }
-    else if (node_type == "l") {
+    else if (node_type == "r") {
         smarty_arm_packet_sub = nh_.subscribe("/pti_interface_left/pti_output", 1, &SMARTY_ARM_Node::ptipacket_callback, this);
         smarty_arm_packet_pub = nh_.advertise<smarty_arm_interface::PTIPacket>("/left_smarty_arm_output", 1);
         smarty_arm_pose_pub = nh_.advertise<geometry_msgs::Pose>("/left_arm_pose", 1);
@@ -41,21 +42,22 @@ void SMARTY_ARM_Node::publish_ptipacket() {
         packet_msg.wave[i] = arm->ptiPacket[i].wave_out;
         packet_msg.test[i] = arm->ptiPacket[i].test;
     }
-    packet_msg.position.x = arm->ee[0].pos;
-    packet_msg.position.y = arm->ee[1].pos;
+    // Modified signs for Diffusion Policy setup
+    packet_msg.position.x = -arm->ee[0].pos;
+    packet_msg.position.y = -arm->ee[1].pos;
     packet_msg.position.z = arm->ee[2].pos;
     packet_msg.angle.x = arm->ee[3].pos;
     packet_msg.angle.y = arm->ee[4].pos;
     packet_msg.angle.z = arm->ee[5].pos;
     packet_msg.quat.w = arm->quat.w;
-    packet_msg.quat.x = arm->quat.x;
-    packet_msg.quat.y = arm->quat.y;
+    packet_msg.quat.x = -arm->quat.x;
+    packet_msg.quat.y = -arm->quat.y;
     packet_msg.quat.z = arm->quat.z;
-    packet_msg.twist.linear.x = arm->ee[0].vel;
-    packet_msg.twist.linear.y = arm->ee[1].vel;
+    packet_msg.twist.linear.x = -arm->ee[0].vel;
+    packet_msg.twist.linear.y = -arm->ee[1].vel;
     packet_msg.twist.linear.z = arm->ee[2].vel;
-    packet_msg.twist.angular.x = arm->ee[3].vel;
-    packet_msg.twist.angular.y = arm->ee[4].vel;
+    packet_msg.twist.angular.x = -arm->ee[3].vel;
+    packet_msg.twist.angular.y = -arm->ee[4].vel;
     packet_msg.twist.angular.z = arm->ee[5].vel;
     packet_msg.local_stamp = ros::Time::now().toSec();
     packet_msg.remote_stamp = arm->ts.remote_time;
@@ -114,12 +116,12 @@ void SMARTY_ARM_Node::ptipacket_callback(const smarty_arm_interface::PTIPacket::
 
 void SMARTY_ARM_Node::publish_pose_state() {
     geometry_msgs::Pose pose;
-    pose.position.x = arm->ee[0].pos;
-    pose.position.y = arm->ee[1].pos;
+    pose.position.x = -arm->ee[0].pos;
+    pose.position.y = -arm->ee[1].pos;
     pose.position.z = arm->ee[2].pos;
     pose.orientation.w = arm->quat.w;
-    pose.orientation.x = arm->quat.x;
-    pose.orientation.y = arm->quat.y;
+    pose.orientation.x = -arm->quat.x;
+    pose.orientation.y = -arm->quat.y;
     pose.orientation.z = arm->quat.z;
 
     smarty_arm_pose_pub.publish(pose);
