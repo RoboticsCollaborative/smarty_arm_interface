@@ -13,6 +13,7 @@
 #include <std_msgs/Float64.h>
 #include <std_srvs/Empty.h>
 #include <std_msgs/Bool.h>
+#include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/Pose.h>
 #include "smarty_arm_interface/PTIPacket.h"
 #include <dynamic_reconfigure/server.h>

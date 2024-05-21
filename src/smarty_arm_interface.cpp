@@ -15,12 +15,12 @@ SMARTY_ARM_Node::SMARTY_ARM_Node(ros::NodeHandle &node, Arm *armptr, std::string
     if (node_type == "l") {
         smarty_arm_packet_sub = nh_.subscribe("/pti_interface_right/pti_output", 1, &SMARTY_ARM_Node::ptipacket_callback, this);
         smarty_arm_packet_pub = nh_.advertise<smarty_arm_interface::PTIPacket>("/right_smarty_arm_output", 1);
-        smarty_arm_pose_pub = nh_.advertise<geometry_msgs::Pose>("/right_arm_pose", 1);
+        smarty_arm_pose_pub = nh_.advertise<geometry_msgs::PoseStamped>("/right_arm_pose", 1);
     }
     else if (node_type == "r") {
         smarty_arm_packet_sub = nh_.subscribe("/pti_interface_left/pti_output", 1, &SMARTY_ARM_Node::ptipacket_callback, this);
         smarty_arm_packet_pub = nh_.advertise<smarty_arm_interface::PTIPacket>("/left_smarty_arm_output", 1);
-        smarty_arm_pose_pub = nh_.advertise<geometry_msgs::Pose>("/left_arm_pose", 1);
+        smarty_arm_pose_pub = nh_.advertise<geometry_msgs::PoseStamped>("/left_arm_pose", 1);
     }
 
     ROS_INFO("Node initialized");
@@ -61,6 +61,7 @@ void SMARTY_ARM_Node::publish_ptipacket() {
     packet_msg.twist.angular.z = arm->ee[5].vel;
     packet_msg.local_stamp = ros::Time::now().toSec();
     packet_msg.remote_stamp = arm->ts.remote_time;
+    packet_msg.header.stamp = ros::Time::now();
     mutex_unlock(&arm->mutex);
 
     // if (smarty_arm_packet_pub.getNumSubscribers() == 0) {
@@ -115,14 +116,15 @@ void SMARTY_ARM_Node::ptipacket_callback(const smarty_arm_interface::PTIPacket::
 }
 
 void SMARTY_ARM_Node::publish_pose_state() {
-    geometry_msgs::Pose pose;
-    pose.position.x = -arm->ee[0].pos;
-    pose.position.y = -arm->ee[1].pos;
-    pose.position.z = arm->ee[2].pos;
-    pose.orientation.w = arm->quat.w;
-    pose.orientation.x = -arm->quat.x;
-    pose.orientation.y = -arm->quat.y;
-    pose.orientation.z = arm->quat.z;
+    geometry_msgs::PoseStamped pose;
+    pose.header.stamp = ros::Time::now();
+    pose.pose.position.x = -arm->ee[0].pos;
+    pose.pose.position.y = -arm->ee[1].pos;
+    pose.pose.position.z = arm->ee[2].pos;
+    pose.pose.orientation.w = arm->quat.w;
+    pose.pose.orientation.x = -arm->quat.x;
+    pose.pose.orientation.y = -arm->quat.y;
+    pose.pose.orientation.z = arm->quat.z;
 
     smarty_arm_pose_pub.publish(pose);
 }

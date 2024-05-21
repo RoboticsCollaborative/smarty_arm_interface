@@ -1,3 +1,5 @@
+std_msgs/Header header
+
 float64[] wave
 geometry_msgs/Point position
 geometry_msgs/Point angle
