@@ -14,25 +14,12 @@ find_package(catkin REQUIRED COMPONENTS
     geometry_msgs
     message_generation
     dynamic_reconfigure
+    avatar_msgs
 )
 
 ## System dependencies are found with CMake's conventions
 find_package(Boost COMPONENTS system python thread program_options REQUIRED)
 
-## Generate messages in the 'msg' folder
-add_message_files(
-    DIRECTORY
-    msg
-    FILES
-    PTIPacket.msg
-)
-
-## Generate added messages and services with any dependencies listed here
-generate_messages(
-  DEPENDENCIES
-  std_msgs
-  geometry_msgs
-)
 
 ## Generate dynamic reconfigure parameters in the 'cfg' folder
 generate_dynamic_reconfigure_options(
@@ -51,7 +38,7 @@ generate_dynamic_reconfigure_options(
 catkin_package(
     INCLUDE_DIRS include
     #  LIBRARIES rdda_interface
-    CATKIN_DEPENDS roscpp rospy std_msgs
+    CATKIN_DEPENDS roscpp rospy std_msgs avatar_msgs
     #  DEPENDS system_lib
 )
 
@@ -80,7 +67,7 @@ target_link_libraries(${PROJECT_NAME}_node
     ${PROJECT_NAME}_src
     -lrt
 )
-add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_generate_messages)
+add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
 
 # add_executable(${PROJECT_NAME}_panel src/server.cpp)
 # target_link_libraries(${PROJECT_NAME}_panel 

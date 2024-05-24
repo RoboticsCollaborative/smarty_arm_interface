@@ -14,12 +14,12 @@ SMARTY_ARM_Node::SMARTY_ARM_Node(ros::NodeHandle &node, Arm *armptr, std::string
     // Hacky solution to mirror the arm control signal for Diffusion Policy setup
     if (node_type == "l") {
         smarty_arm_packet_sub = nh_.subscribe("/pti_interface_right/pti_output", 1, &SMARTY_ARM_Node::ptipacket_callback, this);
-        smarty_arm_packet_pub = nh_.advertise<smarty_arm_interface::PTIPacket>("/right_smarty_arm_output", 1);
+        smarty_arm_packet_pub = nh_.advertise<avatar_msgs::PTIPacket>("/right_smarty_arm_output", 1);
         smarty_arm_pose_pub = nh_.advertise<geometry_msgs::PoseStamped>("/right_arm_pose", 1);
     }
     else if (node_type == "r") {
         smarty_arm_packet_sub = nh_.subscribe("/pti_interface_left/pti_output", 1, &SMARTY_ARM_Node::ptipacket_callback, this);
-        smarty_arm_packet_pub = nh_.advertise<smarty_arm_interface::PTIPacket>("/left_smarty_arm_output", 1);
+        smarty_arm_packet_pub = nh_.advertise<avatar_msgs::PTIPacket>("/left_smarty_arm_output", 1);
         smarty_arm_pose_pub = nh_.advertise<geometry_msgs::PoseStamped>("/left_arm_pose", 1);
     }
 
@@ -32,7 +32,7 @@ SMARTY_ARM_Node::~SMARTY_ARM_Node() = default;
 /* Publish arm packet through ROS */
 void SMARTY_ARM_Node::publish_ptipacket() {
 
-    smarty_arm_interface::PTIPacket packet_msg;
+    avatar_msgs::PTIPacket packet_msg;
 
     packet_msg.wave.resize(3);
     packet_msg.test.resize(3);
@@ -68,13 +68,13 @@ void SMARTY_ARM_Node::publish_ptipacket() {
     //     if (node_type == "r") {
     //         ROS_ERROR_STREAM("Connection lost, trying to reconnect...");
     //         smarty_arm_packet_pub.shutdown();
-    //         smarty_arm_packet_pub = nh_.advertise<smarty_arm_interface::PTIPacket>("/right_smarty_arm_output", 1);
+    //         smarty_arm_packet_pub = nh_.advertise<avatar_msgs::PTIPacket>("/right_smarty_arm_output", 1);
     //         // smarty_arm_packet_sub = nh_.subscribe("/pti_right_output", 1, &SMARTY_ARM_Node::ptipacket_callback, this, ros::TransportHints().udp());
     //     }
     //     if (node_type == "l") {
     //         ROS_ERROR_STREAM("Connection lost, trying to reconnect...");
     //         smarty_arm_packet_pub.shutdown();
-    //         smarty_arm_packet_pub = nh_.advertise<smarty_arm_interface::PTIPacket>("/left_smarty_arm_output", 1);
+    //         smarty_arm_packet_pub = nh_.advertise<avatar_msgs::PTIPacket>("/left_smarty_arm_output", 1);
     //         // smarty_arm_packet_sub = nh_.subscribe("/pti_left_output", 1, &SMARTY_ARM_Node::ptipacket_callback, this, ros::TransportHints().udp());
     //     }
     // }
@@ -86,7 +86,7 @@ void SMARTY_ARM_Node::publish_ptipacket() {
 
 /* Subscriber callback */
 /* Comment out callback for remote test */
-void SMARTY_ARM_Node::ptipacket_callback(const smarty_arm_interface::PTIPacket::ConstPtr &packet_msg) {
+void SMARTY_ARM_Node::ptipacket_callback(const avatar_msgs::PTIPacket::ConstPtr &packet_msg) {
     double delay_time;
     mutex_lock(&arm->mutex);
     // std::cout << "Test" << std::endl;
